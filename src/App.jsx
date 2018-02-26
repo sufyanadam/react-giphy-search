@@ -8,7 +8,7 @@ class App extends Component {
     super(props);
 
     this.GIPHY_API_KEY          = process.env.REACT_APP_GIPHY_API_KEY;
-    this.GIPHY_SEARCH_URL       = `http://api.giphy.com/v1/gifs/search?api_key=${this.GIPHY_API_KEY}&q=`;
+    this.GIPHY_SEARCH_URL       = `//api.giphy.com/v1/gifs/search?api_key=${this.GIPHY_API_KEY}&q=`;
     this.DEFAULT_PER_PAGE_LIMIT = 24;
 
     this.state = {
