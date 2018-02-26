@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import './App.css';
 import ImageCollection from './ImageCollection';
+import PaginationControls from './PaginationControls';
 
 class App extends Component {
   constructor(props) {
@@ -45,6 +46,14 @@ class App extends Component {
         <div style={style.searchResults}>
           <ImageCollection images={this.state.images}></ImageCollection>
         </div>
+        <PaginationControls
+          visible={this.state.images.length > 0}
+          currentPage={Math.ceil((this.state.offset + 1) / this.state.perPage, 10)}
+          pageCount={parseInt(this.state.totalCount  / this.state.perPage, 10)}
+          onNextPageClicked={this.onNextPageClicked.bind(this)}
+          onPreviousPageClicked={this.onPreviousPageClicked.bind(this)}
+        >
+        </PaginationControls>
       </div>
     );
   }
@@ -75,17 +84,27 @@ class App extends Component {
     fetch(url)
       .then(response => { return response.json() })
       .then(json     => {
-        const newState = this.determineNewState(terms, json);
+        const newState  = this.determineNewState(terms, json);
         this.cache[url] = newState;
         this.setState(newState);
       });
   }
 
+  getPaginationDataFrom(apiResponse) {
+    return {
+      perPage:     apiResponse.count,
+      totalCount:  apiResponse.total_count,
+      offset:      apiResponse.offset,
+    };
+  }
+
   determineNewState(terms, apiResponse) {
-    const images = this.extractImageUrlsFrom(apiResponse.data);
+    const paginationData = this.getPaginationDataFrom(apiResponse.pagination);
+    const images         = this.extractImageUrlsFrom(apiResponse.data);
 
     return Object.assign(
       {searchTerms: terms, images: images},
+      paginationData
     );
   }
 
@@ -93,6 +112,16 @@ class App extends Component {
     return apiResponse.map((image, index) => {
       return image.images.fixed_width.url;
     });
+  }
+
+  onPreviousPageClicked(e) {
+    let newOffset = this.state.offset - this.state.perPage;
+    this.search(this.state.searchTerms, newOffset);
+  }
+
+  onNextPageClicked(e) {
+    let newOffset = this.state.offset + this.state.perPage;
+    this.search(this.state.searchTerms, newOffset);
   }
 }
 
